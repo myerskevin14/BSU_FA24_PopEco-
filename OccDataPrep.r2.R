@@ -226,7 +226,7 @@ tiff( 'Data/FebTXYear.tiff',
       compression = "lzw", res = 400 )
 #call the plot
 bp
-#turn off
+
 dev.off()
 
 # if you want to save your workspace, because you are still #
