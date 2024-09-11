@@ -54,6 +54,7 @@ library( tidyverse )
 #### Load or create data -----------------------------------------
 # set directory where your data are. 
 # I have it in a Data folder in my Rstudio project:
+
 datadir <- paste( getwd(), "/Data/", sep = "" )
 
 # load observed occurrences:
@@ -100,7 +101,7 @@ I; yrrange; T; J
 # Select obs_df:
 closeddf <- obs_df %>% 
   #filter only rows for last year:
-  dplyr::filter( year == 2017 ) %>%
+  dplyr::filter( year == [T] ) %>%
   #select desired columns to keep:
   dplyr::select( o.sites, year, pres.j1, pres.j2, pres.j3,
                  observer.j1, observer.j2, observer.j3 ) 
