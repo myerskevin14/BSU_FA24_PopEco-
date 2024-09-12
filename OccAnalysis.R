@@ -25,7 +25,7 @@ install.packages( "MuMIn") # package for model selection and evaluation
 # load packages:
 
 library( tidyverse )#includes dplyr, tidyr and ggplot2
-library( unmarked ) #
+library( unmarked ) 
 library( MuMIn )
 ## end of package load ###############
 ###################################################################
