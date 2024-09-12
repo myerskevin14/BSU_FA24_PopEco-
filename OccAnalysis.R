@@ -66,7 +66,7 @@ sc <- apply( siteCovs(umf), MARGIN = 2, FUN = scale )
 # We replace the predictors in our unmarked dataframe with the scaled values:
 siteCovs( umf ) <- sc
 # Why do we scale predictors?
-# Answer: Scaling predictors allows them to be compared to each other as well as improve the efficiency of the model 
+# Answer: Scaling predictors allows them to be compared to each other as well as improve the efficiency of the model. 
 #
 # View summary of unmarked dataframe:
 summary( umf )
