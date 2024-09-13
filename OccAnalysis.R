@@ -50,7 +50,7 @@ head( closeddf ); dim( closeddf )
 # negative relationship with sagebrush). #
 # We expect occupancy to be influenced by habitat (sagebrush and cheatgrass) #
 # Why don't we include temperature in this model for one season?
-# Answer: 
+# Answer: The Feb.minT and AprMay.maxT are constant throughout the season. Without any change to max and min temps, we would not expect that there would be a significant effect from these weather variables on detection.
 #
 # Let's define our unmarked dataframe:
 # Start by defining which columns represent the response (observed occurrences)
@@ -59,14 +59,14 @@ umf <- unmarkedFrameOccu( y = as.matrix( closeddf[ ,c("pres.j1", "pres.j2", "pre
                           siteCovs = closeddf[ ,c("sagebrush", "cheatgrass")],
                           # Define predictors at the survey level as a list:
                           obsCovs = list( obsv = closeddf[ ,c("observer.j1", "observer.j2", "observer.j3")] ) ) 
-
+#characters coverted to factors 
 summary(umf)
 #now scale ecological predictors:
 sc <- apply( siteCovs(umf), MARGIN = 2, FUN = scale )
 # We replace the predictors in our unmarked dataframe with the scaled values:
 siteCovs( umf ) <- sc
 # Why do we scale predictors?
-# Answer: Scaling predictors allows them to be compared to each other as well as improve the efficiency of the model. Without scaling the predictors, comparisons cannot be made effectively.
+# Answer: Scaling predictors allows them to be compared to each other as well as improve the efficiency of the model. Without scaling the predictors, comparisons cannot be made effectively. Scaling predictors can also make interpretation of the data easier. Convergence of data is more efficient when there isn't a wide range of values and loads faster. Scaling factors can also ensure that certain predictors are not over represented in the model. 
 #
 # View summary of unmarked dataframe:
 summary( umf )
@@ -90,14 +90,14 @@ fm.closed
 # ecological submodel:
 confint( fm.closed, type = "state" )
 # Why do we call them coefficients and not predictors?
-# Answer: 
+# Answer: These terms refer to different components of the model. Predictors are the independent variables that are used to explain/predict the variation in the response variable. Coefficients are the parameters of the model that represent the strength/direction of the relationship between each predictor and the response variable.  
 #
 # coefficients for detection submodel:
 confint( fm.closed, type = 'det' )
 #
 # Based on the overlap of the 95% CIs for your predictor coefficients, #
 # can you suggest which may be important to each of your responses? #
-# Answer: 
+# Answer: Based on the CIs generated, tech2, tech3, and tech4 have values that do not include zero, suggesting that they are significant to the model. The intercept and sagebrush CIs include zero, suggesting that these predictors might not have a meaningful effect on the response variable. 
 # 
 #############end full model ###########
 ###### Model selection ---------------------------------------
@@ -146,19 +146,18 @@ unmarked::modSel(fms )
 # use the dredge() function in the MuMIn package. This package allows you to #
 # select alternative Information Criterion metrics including AIC, AICc, QAIC, BIC # 
 modelList <- MuMIn::dredge( fm.closed, rank = 'AIC' )
+#fixed terms are psi(Int) and p(Int)
 #view model selection table:
 modelList
-
 # Which model(s) was/were the most supported? 
-# Answer:
+# Answer: Model 8 was the most supported based on the AIC score being the lowest (154.0) with the weight of 0.740 suggesting that this model has a 74% chance of being the best model of the group. Model 14 was the second had the second lowest AIC (158.0) but had a weight of 0.099, suggesting that it had less than a 10% chance of being the best model.  
 #
 # Does this change the inference from running the full model alone? How?
-# Answer:
+# Answer: Yes, model selection improves the level of confidence in the significant predictors and provides a more reliable inference. Using the full model alone could cause the model to become overfitted and lead to less reliable inferences. 
 # 
 # When is model selection a suitable approach?
-# Answer:
+# Answer: Model selection is a suitable approach when you want to compare/choose among several models to find the one that best explains the data or make predictions while avoiding overfitting. Situations where you have multiple candidate models, if you are unsure of the significance of the predictors, or when you are worried about the complexity of the model. 
 #
-
 # What would our estimates of occupancy be if we had not done any modeling?
 # calculate naive occupancy by assigning a site as occupied if occurrence was #
 # detected in any of the surveys, and as empty if occurrence was not detected #
@@ -170,20 +169,19 @@ y.naive <- ifelse( rowSums( closeddf[ ,c("pres.j1", "pres.j2", "pres.j3")])>0,1,
 # Estimate conditional occupancy at each site:
 re <- ranef( fm.closed )
 # the use those to estimate occupancy with the bup() function:
-y.est.fm.closed <-round( bup(re, stat="mean" ) ) # Posterior mean
+y.est.fm.closed <-round( bup(re, stat="mean" )) # Posterior mean
 # Repeat this process for other top model and the null:
-y.est.fm.5 <-round( bup(ranef(fm.5), stat="mean" ) ) # Posterior mean
+y.est.fm.14 <-round( bup(ranef(fm.14), stat="mean" ) ) # Posterior mean
 y.est.fm.16 <-round( bup(ranef(fm.16), stat="mean" ) ) # Posterior mean
 # Compare results among them:
 y.est.fm.closed - y.naive
-y.est.fm.closed - y.est.fm.5
+y.est.fm.closed - y.est.fm.14
 y.est.fm.closed - y.est.fm.16
 #view together
-data.frame( y.naive, y.est.fm.closed, y.est.fm.5, y.est.fm.16 )
-# What do these results tell us about the importance of accounting for effects #
-# that impact detection?
-# Answer:
-
+data.frame( y.naive, y.est.fm.closed, y.est.fm.14, y.est.fm.16 )
+# What do these results tell us about the importance of accounting for effects that impact detection?
+# Answer: The results highlight the critical importance of accounting for effects that impact detection. The Naive detection models can underestimate true occupancy because the fail to account for factors like observer skills/training, environmental conditions, or site characteristics that influence detection probability. The full model (model 8) takes into account these effects and provides a more accurate estimate of detection/occupancy, generating a more reliable inference.
+#
 # What was the estimated mean occupancy while keeping #
 # sagebrush and cheatgrass at their mean values:
 backTransform( linearComb( fm.closed, coefficients = c(1,0,0) , 
@@ -192,7 +190,7 @@ backTransform( linearComb( fm.closed, coefficients = c(1,0,0) ,
 # from the logit scale. The ecological model has 1 intercept and two predictors.#
 # The predictors are scaled so their mean is 0, the intercept is 1, thus: c(1,0,0).#
 # What was our estimated occupancy?
-# Answer:
+# Answer: The estimated occupancy generated is 0.382, which aligns with the estimate provided in the table. Suggesting that based on the logistic transformation of the linear combination, the predicted occupancy is around 38.2% when sagebrush and cheatgrass are at their mean (zero after scaling).
 #
 # What about our mean probability of detection for each observer?
 # We start with observer 1:
@@ -208,7 +206,7 @@ backTransform( linearComb( fm.closed, coefficients = c(1,0,0,0,1), type = "det" 
 
 # What do these results tell us about what drives occupancy and detection of #
 # Piute ground squirrels in 2007?
-# Answer:
+# Answer:These results highlight the need to account for both observer effects and environmental variables (sagebrush and cheatgrass) when assessing occupancy/detection. Different observers have varying levels of effectiveness and environmental factors can significantly influence the detection probabilities. Observer 1 had the highest detection probability (51.2%) and observer 4 had the lowest detection probability (3.2%). 
 #
 
 # end of analysis ######
@@ -221,7 +219,7 @@ backTransform( linearComb( fm.closed, coefficients = c(1,0,0,0,1), type = "det" 
 save.image( "OccAnalysisWorkspace.RData" )
 
 # Why don't we want to re-run the analyses every time instead?
-# Answer:
+# Answer: Re-running the analyses can be important for validating results and answering different questions but it is more practical to run an initial comprehensive analysis and then make targeted updates as necessary. Computational costs of re-running models can become expensive. Having a baseline model helps in understanding the impact of new additional variables or significant changes and can act as a reference point. 
 #
 
 ########## End of saving section ##################################
