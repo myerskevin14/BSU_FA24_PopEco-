@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #######################################################################
 #######################################################################
 ##     This script was created by Dr. Jen Cruz as part of            ##
@@ -54,10 +55,11 @@ gof.boot
 
 # What does the table tell us about the comparison between observed and expected #
 # frequency of ground squirrel site-level detection histories?
-# Answer:
+##Answer: The table shows us the difference in the observed vs the expected values for the different levels of detection. The chi-squared values tell us whether there is a statistical difference between the observes vs expected values. 
+##model fits data well, observed values were similar to expected.
 # 
 # What is the c-hat value?
-# Answer:
+# Answer: 1.91
 # 
 # Note that values of c-hat > 1 indicate overdispersion (variance > mean), but #
 # that values much higher than 1 (i.e., > 4) probably indicate lack-of-fit. #
@@ -68,7 +70,7 @@ gof.boot
 # Note that values of c-hat << 1 can also indicate lack-of-fit. #
 
 # Is our model over- or under-dispersed?
-# Answer:
+# Answer: overdispersion - high c-hat value 
 #
 # We can also evaluate how well our full model did against the null model # 
 # by estimating pseudo-R^2, based on Nagelkerke, N.J.D. (2004) A Note #
@@ -77,12 +79,12 @@ gof.boot
 # (1 - R^2) represents the proportion of unexplained variation in the model
 # We create a reduced model list with only our two models of interest:
 rms <- fitList( 'psi(sagebrush + cheatgrass)p(obsv+sagebrush)' = fm.closed,
-                'psi(.)p(.)' = fm.16 )
+                'psi(.)p(.)' = fm.16) #fitlist function compares different models one model only includes the intercept. 
 # Then use model selection function from unmarked but this time we define #
-# which one our null model is:
+# which one our null model is: 
 unmarked::modSel(rms, nullmod = "psi(.)p(.)" )
 # What does this tell us about the fit of our model?
-# Answer:
+# Answer: pseudo-R^2 value is relative to the null model. intercept only model was 0% able to explain the data, the alternative model with cheatgrass and sagebush explained 26% of the data.
 #
 # Note that there are multiple approaches for estimating pseudo-Rsquares. See:
 # https://stats.idre.ucla.edu/other/mult-pkg/faq/general/faq-what-are-pseudo-r-squareds/
@@ -134,6 +136,7 @@ pb
 par(mfrow = c(3,1))
 plot(pb, xlab = c("SSE", "Chisq", "FT") )
 
+
 ######## end of model evaluation ##############
 ##### Producing model output ##############
 # Now that we have evaluated the value of our model we can produce #
@@ -141,12 +144,18 @@ plot(pb, xlab = c("SSE", "Chisq", "FT") )
 # detection of Piute ground squirrels at the NCA, we would want to #
 # plot the relationships between our model predictors and responses #
 
+logit(psi[i]) = beta[0]+ beta[1]*sagebrush[i]
+
+logit(p[i,j]) = alpha[0] +alpha[1]*observer + alpha[1]sagebrush[i] 
+
+## why simulate data if you have the data? To make a nice plot that doesn't have gaps.creates evenly spaced values of sagebrush for a clean line. 
+
 # Using our global model we estimate partial prediction plots #
 # for our predictors. These plot the relationship between the #
 # response and predictor of interest, while keeping the remaining #
 # predictors at their mean values. # 
 # What is the mean of our predictors?
-# Answer:
+# Answer: Unsure of how to answer this question. Should I use the logit functions above?
 #
 # To create nice plots we need to create new vectors with evenly #
 # spaced predictors within their actual observed range: #
@@ -154,10 +163,10 @@ plot(pb, xlab = c("SSE", "Chisq", "FT") )
 n <- 100
 # we use the observed values to define our range:
 sagebrush <- seq( min( closeddf[,"sagebrush"]),max( closeddf[,"sagebrush"]),
-                  length.out = n )
+                  length.out = n )#evenly spaced cover values 
 cheatgrass <- seq( min( closeddf[,"cheatgrass"]),max( closeddf[,"cheatgrass"]),
                    length.out = n )
-#standardize them
+#standardize them ##scaled data used to combine but use raw data for plotting 
 sage.std <- scale( sagebrush )
 cheat.std <- scale( cheatgrass )
 #combine standardized predictor into a new dataframe to predict partial relationship
@@ -165,7 +174,7 @@ cheat.std <- scale( cheatgrass )
 sageData <- data.frame( sagebrush = sage.std, cheatgrass = 0 )
 #predict partial relationship between sagebrush and occupancy
 pred.occ.sage <- predict( fm.closed, type = "state", newdata = sageData, 
-                          appendData = TRUE )
+                          appendData = TRUE ) #predict using the simulated data 
 #view
 head( pred.occ.sage ); dim( pred.occ.sage )
 
@@ -175,7 +184,8 @@ cheatData <- data.frame( sagebrush = 0, cheatgrass = cheat.std )
 #predict partial relationship between sagebrush and occupancy
 pred.occ.cheat <- predict( fm.closed, type = "state", newdata = cheatData, 
                            appendData = TRUE )
-
+#view
+head( pred.occ.cheat ); dim( pred.occ.cheat )
 #combine standardized predictor into a new dataframe to predict partial relationship
 # with sagebrush. We set observer effect as tech 1
 sageDet <- data.frame( obsv = factor( "tech.1", levels = c("tech.1", "tech.2",
@@ -208,7 +218,7 @@ sagep <- cbind( pred.occ.sage[,c("Predicted", "lower", "upper") ], sagebrush ) %
   # add mean line on top
   geom_line( size = 2 ) 
 #view
-sagep
+sagep ## ERROR??
 
 #Now cheatgrass and occupancy:
 # select the predicted values we want to plot and combine with unscaled predictor
@@ -222,11 +232,11 @@ cheatp <- cbind( pred.occ.cheat[,c("Predicted", "lower", "upper") ], cheatgrass 
   # add band of confidence intervals
   geom_smooth( aes(ymin = lower, ymax = upper ), 
                stat = "identity",
-               size = 1.5, alpha = 0.5, color = "grey" ) +
+               size = 1.5, alpha = 0.5, color = "blue" ) +
   # add mean line on top
   geom_line( size = 2 ) 
 #view
-cheatp
+cheatp ##ERROR?? 
 
 # Now sagebrush and detection:
 # select the predicted values we want to plot and combine with unscaled predictor
@@ -262,11 +272,11 @@ obsvp.det <- pred.det.obsv %>%
   geom_errorbar( aes(ymin = lower, ymax = upper ), 
                  size = 1.5, width = 0.3 ) 
 #view
-obsvp.det
+obsvp.det ##ERROR
 
 # If you were reporting these in a manuscript, which (if any) would you #
 # leave out? Why? 
-# Answer:
+# Answer: No. leave out any plot with insignificant relationships 
 #
 #### end model results section #############
 ###################
@@ -315,4 +325,4 @@ save.image( "OccResultsWorkspace.RData" )
 
 ########## End of saving section ##################################
 
-############# END OF SCRIPT #####################################
+=======
